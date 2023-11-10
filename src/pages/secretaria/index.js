@@ -253,7 +253,6 @@ export default class Index extends Component {
 	};
 
 	render() {
-
 		const arrayAlunos = this.state.arrayAlunos;
 		return (
 			<>
