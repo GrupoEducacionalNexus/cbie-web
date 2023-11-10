@@ -11,10 +11,7 @@ import { listaDePrioridades } from '../../services/getListaDePrioridades';
 import Menu from '../../components/Menu';
 import backgroundImage from '../../assets/sistema_chamados.png';
 import UserContext from '../../UserContext';
-import AdminNavbar from '../../components/Navbar';
-import MainContent from '../../components/MainContent';
 import FloatingMenu from '../../components/FloatingMenu';
-
 
 export default class Index extends Component {
 	static contextType = UserContext;
@@ -56,7 +53,6 @@ export default class Index extends Component {
 
 	componentDidMount() {
 		const user = this.context
-		console.log(user) // { name: 'Tania', loggedIn: true }
 		this.listaDeUsuarios(getToken());
 		this.listaDeTiposDeChamados(getToken());
 		this.listaPermissoes();
@@ -73,11 +69,11 @@ export default class Index extends Component {
 	handlerShowModalAtualizarUsuario(usuario = null) {
 		this.setModalShowAtualizarUsuario(true);
 		this.setState({
-			id_usuario: usuario.id, permissoes_usuario: usuario.permissoes !== null ?
-				usuario.permissoes.split(",").map(Number) : [], nome: usuario.nome, email: usuario.email,
+			id_usuario: usuario.id, nome: usuario.nome, email: usuario.email,
 			cpf_cnpj: usuario.cpf_cnpj, senha: usuario.senha, confirmarSenha: usuario.senha, id_setor: usuario.id_setor
 		});
 		listaDeSetores(getToken()).then(result => this.setState({ arraySetores: result }));
+		this.listaPermissoesDoUsuario(usuario.id);
 	}
 
 	handlerCloseModalAtualizarUsuario() {
@@ -155,6 +151,29 @@ export default class Index extends Component {
 		}
 	};
 
+	listaPermissoesDoUsuario = async (id_usuario) => {
+		try {
+			const response = await fetch(`${api.baseURL}/usuarios/${id_usuario}/permissoes`, {
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+					'x-access-token': getToken()
+				}
+			});
+
+			const data = await response.json();
+			console.log(data);
+			if (data.status === 200) {
+				this.setState({ permissoes_usuario: data.resultados });
+			}
+
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+
 	definirPermissao = async (id_usuario, id_permissao) => {
 		try {
 			const response = await fetch(`${api.baseURL}/permissoes/${id_permissao}/usuarios`, {
@@ -162,7 +181,7 @@ export default class Index extends Component {
 				headers: {
 					Accept: 'application/json',
 					'Content-Type': 'application/json',
-					'x-access-token': getToken(),
+					'x-access-token': getToken()
 				},
 				body: JSON.stringify({
 					id_usuario
@@ -195,8 +214,9 @@ export default class Index extends Component {
 
 	marcarPermissoes() {
 		if (this.state.permissoes_usuario.length > 0) {
-			this.state.permissoes_usuario.map(valor => {
-				document.getElementById(`checkPermissao_${valor}`).checked = true;
+			this.state.permissoes_usuario.map(permissao => {
+				document.getElementById(`checkPermissao_${permissao.id_permissao}`).checked = true;
+				console.log(permissao);
 			});
 
 		}
@@ -317,18 +337,14 @@ export default class Index extends Component {
 				<Menu />
 				<Row>
 					<Col xs={12}>
-						<AdminNavbar id_usuario={this.state.id_usuario}
-							listaDeChamados={this.listaDeChamados}
-							handlerShowModalCadastrarChamado={this.handlerShowModalCadastrarChamado}
-						/> {/* Adicione o componente AdminNavbar aqui */}
+
 					</Col>
 				</Row>
 				<Row>
 					<Col xs={12} id="main">
-						<MainContent>
-							<FloatingMenu>
-								<ul className="dropdown-menu">
-									{/* <li>
+						<FloatingMenu>
+							<ul className="dropdown-menu">
+								{/* <li>
 										<a onClick={() => this.handlerShowModalCadastrarChamado()}><FaPlus /> Solicitar chamado</a>
 									</li>
 									<li>
@@ -344,331 +360,331 @@ export default class Index extends Component {
 										</li>
 									) : ("")} */}
 
-								</ul>
-							</FloatingMenu>
+							</ul>
+						</FloatingMenu>
 
-							<div className='container mt-4 mb-4'>
-								<Tabs
-									defaultActiveKey="home"
-									id="tap-memu-admin"
-									className="justify-content-center mb-3"
-									variant='pills'>
-									<Tab eventKey="home" title="Usuários">
-										<h2 className='lead text-light'><FaUserGraduate /> Usuários</h2>
-										<hr />
-										<div className="table-responsive table-sm">
-											<div class="table-wrapper">
-												<table className="table table-bordered table-light table-hover text-center">
-													<thead className="thead-light">
-														<tr>
-															<th scope="col" >Id</th>
-															<th scope="col" >Cpf/cnpj</th>
-															<th scope="col" >Nome</th>
-															<th scope="col" >email</th>
-															<th scope="col" >Status</th>
-															<th scope="col" >Data e hora de criação</th>
-															<th scope='col'>Ações</th>
-														</tr>
-													</thead>
-													<tbody>
-														{arrayUsuarios.length > 0 ? (
-															arrayUsuarios.map((usuario, index) => (
-																<tr key={index}>
-																	<td >{usuario.id}</td>
-																	<td >{usuario.cpf_cnpj}</td>
-																	<td >{usuario.nome}</td>
-																	<td >{usuario.email}</td>
-																	<td >{usuario.status}</td>
-																	<td >{usuario.dataHoraCriacao}</td>
-																	<td ><button className='button'
-																		onClick={() => this.handlerShowModalAtualizarUsuario(usuario)}>
-																		Atualizar
-																	</button></td>
-																</tr>
-															))
-														) :
-															(<tr className="text-center">
-																<td colSpan="15">
-																	<Spinner animation="border" />
-																</td>
-															</tr>)
-														}
-													</tbody>
-												</table>
-											</div>
-										</div>
-									</Tab>
-									<Tab eventKey="tipos_chamados" title="Tipos de chamados">
-
-										<div className='row'>
-											<div className='col-sm-10'>	<h2 className='lead text-light'><FaUserGraduate /> Tipos de chamados</h2></div>
-											<div className='col-sm-2 text-right'><button className='button' onClick={() => this.handlerShowModalCadastrarEAtualizarTipoChamado()}>Cadastrar</button></div>
-										</div>
-
-										<hr />
-
-										<div className="table-responsive table-sm">
-											<div class="table-wrapper">
-												<table className="table table-bordered table-hover text-center table-light">
-													<thead className="thead-light">
-														<tr>
-															<th scope="col" >Id</th>
-															<th scope="col" >Nome</th>
-															<th scope="col" >Setor responsável</th>
-															<th scope="col" >Data e hora de criação</th>
-															<th scope='col'>Ações</th>
-														</tr>
-													</thead>
-													<tbody>
-														{this.state.arrayTiposChamados.length > 0 ? (
-															this.state.arrayTiposChamados.map(tipo_chamado => (
-																<tr key={tipo_chamado.id} title="Clique aqui para obter mais informações sobre o tipo de chamado">
-																	<td>{tipo_chamado.id}</td>
-																	<td>{tipo_chamado.tipo}</td>
-																	<td>{tipo_chamado.setor_responsavel}</td>
-																	<td>{tipo_chamado.dataHoraCriacao}</td>
-																	<td><button className='button' onClick={() => this.handlerShowModalCadastrarEAtualizarTipoChamado(tipo_chamado)}>Atualizar</button></td>
-																</tr>
-															))
-														) : (<tr className="text-center">
+						<div className='container mt-4 mb-4'>
+							<Tabs
+								defaultActiveKey="home"
+								id="tap-memu-admin"
+								className="justify-content-center mb-3"
+								variant='pills'>
+								<Tab eventKey="home" title="Usuários">
+									<h2 className='lead text-light'><FaUserGraduate /> Usuários</h2>
+									<hr />
+									<div className="table-responsive table-sm">
+										<div class="table-wrapper">
+											<table className="table table-bordered table-light table-hover text-center">
+												<thead className="thead-light">
+													<tr>
+														<th scope="col" >Id</th>
+														<th scope="col" >Cpf/cnpj</th>
+														<th scope="col" >Nome</th>
+														<th scope="col" >email</th>
+														<th scope="col" >Status</th>
+														<th scope="col" >Data e hora de criação</th>
+														<th scope='col'>Ações</th>
+													</tr>
+												</thead>
+												<tbody>
+													{arrayUsuarios.length > 0 ? (
+														arrayUsuarios.map((usuario, index) => (
+															<tr key={index}>
+																<td >{usuario.id}</td>
+																<td >{usuario.cpf_cnpj}</td>
+																<td >{usuario.nome}</td>
+																<td >{usuario.email}</td>
+																<td >{usuario.status}</td>
+																<td >{usuario.dataHoraCriacao}</td>
+																<td ><button className='button'
+																	onClick={() => this.handlerShowModalAtualizarUsuario(usuario)}>
+																	Atualizar
+																</button></td>
+															</tr>
+														))
+													) :
+														(<tr className="text-center">
 															<td colSpan="15">
 																<Spinner animation="border" />
 															</td>
-														</tr>)}
-													</tbody>
-												</table>
-											</div>
+														</tr>)
+													}
+												</tbody>
+											</table>
 										</div>
-									</Tab>
-								</Tabs>
-							</div>
-							{/* /.content */}
-							< br />
+									</div>
+								</Tab>
+								<Tab eventKey="tipos_chamados" title="Tipos de chamados">
 
-							<Modal
-								show={this.state.modalShowAtualizarUsuario}
-								onHide={() => this.handlerCloseModalAtualizarUsuario()}
-								aria-labelledby="contained-modal-title-vcenter"
-								backdrop="static"
-								size="lg"
-								centered
-							>
+									<div className='row'>
+										<div className='col-sm-10'>	<h2 className='lead text-light'><FaUserGraduate /> Tipos de chamados</h2></div>
+										<div className='col-sm-2 text-right'><button className='button' onClick={() => this.handlerShowModalCadastrarEAtualizarTipoChamado()}>Cadastrar</button></div>
+									</div>
 
+									<hr />
+
+									<div className="table-responsive table-sm">
+										<div class="table-wrapper">
+											<table className="table table-bordered table-hover text-center table-light">
+												<thead className="thead-light">
+													<tr>
+														<th scope="col" >Id</th>
+														<th scope="col" >Nome</th>
+														<th scope="col" >Setor responsável</th>
+														<th scope="col" >Data e hora de criação</th>
+														<th scope='col'>Ações</th>
+													</tr>
+												</thead>
+												<tbody>
+													{this.state.arrayTiposChamados.length > 0 ? (
+														this.state.arrayTiposChamados.map(tipo_chamado => (
+															<tr key={tipo_chamado.id} title="Clique aqui para obter mais informações sobre o tipo de chamado">
+																<td>{tipo_chamado.id}</td>
+																<td>{tipo_chamado.tipo}</td>
+																<td>{tipo_chamado.setor_responsavel}</td>
+																<td>{tipo_chamado.dataHoraCriacao}</td>
+																<td><button className='button' onClick={() => this.handlerShowModalCadastrarEAtualizarTipoChamado(tipo_chamado)}>Atualizar</button></td>
+															</tr>
+														))
+													) : (<tr className="text-center">
+														<td colSpan="15">
+															<Spinner animation="border" />
+														</td>
+													</tr>)}
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</Tab>
+							</Tabs>
+						</div>
+						{/* /.content */}
+						< br />
+
+						<Modal
+							show={this.state.modalShowAtualizarUsuario}
+							onHide={() => this.handlerCloseModalAtualizarUsuario()}
+							aria-labelledby="contained-modal-title-vcenter"
+							backdrop="static"
+							size="lg"
+							centered
+						>
+
+							<Modal.Header closeButton>
+								<Modal.Title id="contained-modal-title-vcenter" >
+									<h5 className='titulo'><FaRegWindowClose />Atualizar</h5>
+								</Modal.Title>
+							</Modal.Header>
+							<Modal.Body>
+								<div className='row'>
+									<div className="col-sm-6">
+										<h4 className='lead text-center'>Informações pessoais</h4>
+										<hr />
+										<Form onSubmit={this.atualizarUsuario}>
+											<div className="form-group">
+												<label htmlFor="nome">Nome</label>
+												<input
+													type="text"
+													className="form-control"
+													id="nome"
+													placeholder="Digite seu nome"
+													onChange={(e) =>
+														this.setState({ nome: e.target.value })
+													}
+													value={this.state.nome}
+												/>
+											</div>
+
+											<div className="form-group">
+												<label htmlFor="email">E-mail</label>
+												<input
+													type="email"
+													className="form-control"
+													id="email"
+													placeholder="Informe o seu email"
+													onChange={(e) =>
+														this.setState({ email: e.target.value })
+													}
+													value={this.state.email}
+												/>
+											</div>
+
+											<div className="form-group">
+												<label htmlFor="select_Usuario">CPF</label>
+												<input
+													className="form-control"
+													type="number"
+													placeholder="CPF"
+													name="cpf"
+													onChange={(e) =>
+														this.setState({ cpf_cnpj: e.target.value })
+													}
+													value={this.state.cpf_cnpj}
+												/>
+											</div>
+
+											<p className='text-danger'>*Por favor, preencha os campos de senha e de confirmação de senha caso deseje alterar sua senha.</p>
+
+											<div className="row" style={{ marginBottom: 20 }}>
+												<div className="col-md-6">
+													<div className="form-group">
+														<label htmlFor="senha">Senha</label>
+														<input
+															type="password"
+															className="form-control"
+															id="senha"
+															placeholder="Informe sua senha"
+															onChange={(e) =>
+																this.setState({ senha: e.target.value })
+															}
+															value={this.state.senha}
+														/>
+													</div>
+												</div>
+
+												<div className="col-md-6">
+													<div className="form-group">
+														<label htmlFor="repetir_senha">Repetir Senha</label>
+														<input
+															type="password"
+															className="form-control"
+															id="repetir_senha"
+															placeholder="Informe sua senha novamente"
+															onChange={(e) =>
+																this.setState({ confirmarSenha: e.target.value })
+															}
+															value={this.state.confirmarSenha}
+														/>
+													</div>
+												</div>
+
+											</div>
+
+											<div className="form-group">
+												<label htmlFor="selectSetorResponsavel">Setor responsável:*</label>
+												<select class="form-control form-control-sm" id="selectSetorResponsavel" value={this.state.id_setor}
+													onChange={e => this.setState({ id_setor: e.target.value })}>
+													<option value="0">Selecione</option>
+													{this.state.arraySetores.length > 0 ?
+														this.state.arraySetores.map(setor => (
+															<option value={setor.id}>{setor.nome}</option>
+														))
+														: (<option>0</option>)
+													}
+												</select>
+											</div>
+
+											{this.state.success && (
+												<div class="alert alert-success text-center" role="alert">
+													{this.state.success}
+												</div>
+											)}
+											{this.state.error && (
+												<div className="alert alert-danger text-center" role="alert">
+													{this.state.error}
+												</div>
+											)}
+
+											<div className="d-flex justify-content-center"> <button className="button" type="submit">Atualizar</button></div>
+										</Form>
+									</div>
+									<div className="col-sm-6">
+										<h4 className='lead text-center'>Permissões</h4>
+										<hr />
+										{arrayPermissoes.length > 0 ? (
+											arrayPermissoes.map((permissao, index) => (
+												<div key={index} className="custom-control custom-checkbox">
+													<input type="checkbox" className="custom-control-input" id={`checkPermissao_${permissao.id}`}
+														onChange={() => this.definirPermissao(this.state.id_usuario, permissao.id)} />
+													<label class="custom-control-label" htmlFor={`checkPermissao_${permissao.id}`}>{permissao.nome}</label>
+												</div>
+											))
+										) :
+											<div className="custom-control custom-checkbox">
+												<input type="checkbox" className="custom-control-input" id={"check"} value={0} />
+												<label className="custom-control-label" htmlFor={"check"}>Nenhum resultado encontrado</label>
+											</div>
+										}
+									</div>
+								</div>
+							</Modal.Body>
+							<Modal.Footer>
+
+							</Modal.Footer>
+						</Modal>
+
+						<Modal
+							show={this.state.modalShowCadastrarEAtualizarTipoChamado}
+							onHide={() => this.handlerCloseModalCadastrarEAtualizarTipoChamado()}
+							aria-labelledby="contained-modal-title-vcenter"
+							backdrop="static"
+							size="md"
+							centered
+						>
+							<Form onSubmit={this.cadastrarEatualizarTipoChamado}>
 								<Modal.Header closeButton>
 									<Modal.Title id="contained-modal-title-vcenter" >
-										<h5 className='titulo'><FaRegWindowClose />Atualizar</h5>
+										<h5 className='titulo'><FaRegWindowClose />{this.state.id_tipoChamado !== 0 ? ` Atualizar` : ` Cadastrar`}</h5>
 									</Modal.Title>
 								</Modal.Header>
 								<Modal.Body>
-									<div className='row'>
-										<div className="col-sm-6">
-											<h4 className='lead text-center'>Informações pessoais</h4>
-											<hr />
-											<Form onSubmit={this.atualizarUsuario}>
-												<div className="form-group">
-													<label htmlFor="nome">Nome</label>
-													<input
-														type="text"
-														className="form-control"
-														id="nome"
-														placeholder="Digite seu nome"
-														onChange={(e) =>
-															this.setState({ nome: e.target.value })
-														}
-														value={this.state.nome}
-													/>
-												</div>
-
-												<div className="form-group">
-													<label htmlFor="email">E-mail</label>
-													<input
-														type="email"
-														className="form-control"
-														id="email"
-														placeholder="Informe o seu email"
-														onChange={(e) =>
-															this.setState({ email: e.target.value })
-														}
-														value={this.state.email}
-													/>
-												</div>
-
-												<div className="form-group">
-													<label htmlFor="select_Usuario">CPF</label>
-													<input
-														className="form-control"
-														type="number"
-														placeholder="CPF"
-														name="cpf"
-														onChange={(e) =>
-															this.setState({ cpf_cnpj: e.target.value })
-														}
-														value={this.state.cpf_cnpj}
-													/>
-												</div>
-
-												<p className='text-danger'>*Por favor, preencha os campos de senha e de confirmação de senha caso deseje alterar sua senha.</p>
-
-												<div className="row" style={{ marginBottom: 20 }}>
-													<div className="col-md-6">
-														<div className="form-group">
-															<label htmlFor="senha">Senha</label>
-															<input
-																type="password"
-																className="form-control"
-																id="senha"
-																placeholder="Informe sua senha"
-																onChange={(e) =>
-																	this.setState({ senha: e.target.value })
-																}
-																value={this.state.senha}
-															/>
-														</div>
-													</div>
-
-													<div className="col-md-6">
-														<div className="form-group">
-															<label htmlFor="repetir_senha">Repetir Senha</label>
-															<input
-																type="password"
-																className="form-control"
-																id="repetir_senha"
-																placeholder="Informe sua senha novamente"
-																onChange={(e) =>
-																	this.setState({ confirmarSenha: e.target.value })
-																}
-																value={this.state.confirmarSenha}
-															/>
-														</div>
-													</div>
-
-												</div>
-
-												<div className="form-group">
-													<label htmlFor="selectSetorResponsavel">Setor responsável:*</label>
-													<select class="form-control form-control-sm" id="selectSetorResponsavel" value={this.state.id_setor}
-														onChange={e => this.setState({ id_setor: e.target.value })}>
-														<option value="0">Selecione</option>
-														{this.state.arraySetores.length > 0 ?
-															this.state.arraySetores.map(setor => (
-																<option value={setor.id}>{setor.nome}</option>
-															))
-															: (<option>0</option>)
-														}
-													</select>
-												</div>
-
-												{this.state.success && (
-													<div class="alert alert-success text-center" role="alert">
-														{this.state.success}
-													</div>
-												)}
-												{this.state.error && (
-													<div className="alert alert-danger text-center" role="alert">
-														{this.state.error}
-													</div>
-												)}
-
-												<div className="d-flex justify-content-center"> <button className="button" type="submit">Atualizar</button></div>
-											</Form>
-										</div>
-										<div className="col-sm-6">
-											<h4 className='lead text-center'>Permissões</h4>
-											<hr />
-											{arrayPermissoes.length > 0 ? (
-												arrayPermissoes.map((permissao, index) => (
-													<div key={index} className="custom-control custom-checkbox">
-														<input type="checkbox" className="custom-control-input" id={`checkPermissao_${permissao.id}`}
-															onChange={() => this.definirPermissao(this.state.id_usuario, permissao.id)} />
-														<label class="custom-control-label" htmlFor={`checkPermissao_${permissao.id}`}>{permissao.nome}</label>
-													</div>
-												))
-											) :
-												<div className="custom-control custom-checkbox">
-													<input type="checkbox" className="custom-control-input" id={"check"} value={0} />
-													<label className="custom-control-label" htmlFor={"check"}>Nenhum resultado encontrado</label>
-												</div>
+									<div className="form-group">
+										<label htmlFor="nome">Tipo de chamado</label>
+										<input
+											type="text"
+											className="form-control"
+											id="nome"
+											placeholder="Informe o nome"
+											autoComplete='off'
+											onChange={(e) =>
+												this.setState({ tipo_chamado: e.target.value })
 											}
+											value={this.state.tipo_chamado}
+										/>
+									</div>
+
+									<div className="form-group">
+										<label htmlFor="selectSetorResponsavel">Setor responsável:*</label>
+										<select class="form-control" id="selectSetorResponsavel" value={this.state.idSetorResponsavel}
+											onChange={e => this.setState({ idSetorResponsavel: e.target.value })}>
+											<option value="0">Selecione</option>
+											{this.state.arraySetores.length > 0 ?
+												this.state.arraySetores.map(setor => (
+													<option value={setor.id}>{setor.nome}</option>
+												))
+												: (<option>0</option>)
+											}
+										</select>
+									</div>
+
+									<div className="row mt-2">
+										<div className="col-sm-12">
+											{this.state.success && (
+												<div
+													className="alert alert-success text-center"
+													role="alert"
+												>
+													{this.state.success}
+												</div>
+											)}
+											{this.state.error && (
+												<div
+													className="alert alert-danger text-center"
+													role="alert"
+												>
+													{this.state.error}
+												</div>
+											)}
 										</div>
 									</div>
+
 								</Modal.Body>
-								<Modal.Footer>
+								<Modal.Footer>{parseInt(this.state.id_tipoChamado) !== 0 ? (<button className='button'>Atualizar</button>) : (<button className='button'>Cadastrar</button>)}
 
 								</Modal.Footer>
-							</Modal>
+							</Form>
+						</Modal>
 
-							<Modal
-								show={this.state.modalShowCadastrarEAtualizarTipoChamado}
-								onHide={() => this.handlerCloseModalCadastrarEAtualizarTipoChamado()}
-								aria-labelledby="contained-modal-title-vcenter"
-								backdrop="static"
-								size="md"
-								centered
-							>
-								<Form onSubmit={this.cadastrarEatualizarTipoChamado}>
-									<Modal.Header closeButton>
-										<Modal.Title id="contained-modal-title-vcenter" >
-											<h5 className='titulo'><FaRegWindowClose />{this.state.id_tipoChamado !== 0 ? ` Atualizar` : ` Cadastrar`}</h5>
-										</Modal.Title>
-									</Modal.Header>
-									<Modal.Body>
-										<div className="form-group">
-											<label htmlFor="nome">Tipo de chamado</label>
-											<input
-												type="text"
-												className="form-control"
-												id="nome"
-												placeholder="Informe o nome"
-												autoComplete='off'
-												onChange={(e) =>
-													this.setState({ tipo_chamado: e.target.value })
-												}
-												value={this.state.tipo_chamado}
-											/>
-										</div>
-
-										<div className="form-group">
-											<label htmlFor="selectSetorResponsavel">Setor responsável:*</label>
-											<select class="form-control" id="selectSetorResponsavel" value={this.state.idSetorResponsavel}
-												onChange={e => this.setState({ idSetorResponsavel: e.target.value })}>
-												<option value="0">Selecione</option>
-												{this.state.arraySetores.length > 0 ?
-													this.state.arraySetores.map(setor => (
-														<option value={setor.id}>{setor.nome}</option>
-													))
-													: (<option>0</option>)
-												}
-											</select>
-										</div>
-
-										<div className="row mt-2">
-											<div className="col-sm-12">
-												{this.state.success && (
-													<div
-														className="alert alert-success text-center"
-														role="alert"
-													>
-														{this.state.success}
-													</div>
-												)}
-												{this.state.error && (
-													<div
-														className="alert alert-danger text-center"
-														role="alert"
-													>
-														{this.state.error}
-													</div>
-												)}
-											</div>
-										</div>
-
-									</Modal.Body>
-									<Modal.Footer>{parseInt(this.state.id_tipoChamado) !== 0 ? (<button className='button'>Atualizar</button>) : (<button className='button'>Cadastrar</button>)}
-
-									</Modal.Footer>
-								</Form>
-							</Modal>
-						</MainContent>
 					</Col>
 				</Row>
 			</Container>

@@ -66,9 +66,9 @@ body {
 
 .button {
   display: block;
-  background-color: #000233;
+  background-color: #1F0671;
   border-radius: 5px;
-  border: 1px solid #000233;
+  border: 1px solid #1F0671;
   cursor: pointer;
   color: #ffffff;
   font-family: Arial;
@@ -80,7 +80,7 @@ body {
 
 .button:hover {
   background-color: #f5f5f5;
-  color: #000233;
+  color: #1F0671;
 }
 
 .button-salvar:active {
@@ -504,6 +504,42 @@ Note: Beware of modifying this element as it can break the animations - you shou
   padding: 10px;
 }
 
+.hr {
+  width: 70%;
+  border: none;
+  height: 1px;
+  color: #333;  /* old IE */
+  background-color: #333;  /* Modern Browsers */
+  margin-top: 0px;
+}
 
+.accordion-button.collapsed {
+  background-color: #00943A;
+  color: #ffffff;
+  font-weight: bold;
+}
 
+.accordion-button.collapsed:active,
+.accordion-button.collapsed:focus {
+  background-color: #F7C300;
+  color: #ffffff;
+}
 
+.accordion-button:not(.collapsed) {
+  background-color: #F7C300; 
+  color: #ffffff;
+  font-weight: bold;
+}
+
+table.table-bordered{
+  border:1px solid black;
+  margin-top:20px;
+}
+
+table.table-bordered > thead > tr > th{
+  border:1px solid black;
+
+}
+table.table-bordered > tbody > tr > td{
+  border:1px solid black;
+}

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Offcanvas from 'react-bootstrap/Offcanvas';
-import { FaUserGraduate } from 'react-icons/fa';
+import logo from '../assets/cbie2.png';
 
-function ModalRight({ children, ...props  }) {
+
+function Sidebar() {
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
@@ -11,20 +12,21 @@ function ModalRight({ children, ...props  }) {
 
     return (
         <>
-            <button className="button me-2" size='sm' onClick={handleShow}>
-                {props.name}
+            <button className="button" size='sm' onClick={handleShow}>
+                Menu
             </button>
-            <Offcanvas show={show} onHide={handleClose} {...props}>
+
+            <Offcanvas show={show} onHide={handleClose}>
                 <Offcanvas.Header closeButton>
-                    <Offcanvas.Title><FaUserGraduate/> Cadastrar Aluno</Offcanvas.Title>
+                    <Offcanvas.Title><img id="logo" src={logo} style={{ width: "100px" }} /></Offcanvas.Title>
                 </Offcanvas.Header>
                 <Offcanvas.Body>
-                    {children}
+                    Some text as placeholder. In real life you can have the elements you
+                    have chosen. Like, text, images, lists, etc.
                 </Offcanvas.Body>
             </Offcanvas>
         </>
     );
 }
 
-
-export default ModalRight;
+export default Sidebar;

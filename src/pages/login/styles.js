@@ -6,7 +6,6 @@ export const Container = styled.div`
   justify-content: center;
   flex-direction: column;
   min-height: 100vh;
-  background: #000233;
 
   .titulo {
     font-size: 20px;

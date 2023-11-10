@@ -1,34 +1,35 @@
 import React from 'react';
 import styled from 'styled-components';
-import ri_1 from '../assets/certificado_minicurso_gped.png';
+import ri_1 from '../assets/certificado_congresso.png';
+import ri_2 from '../assets/assinatura.png';
 
 export const Certificado = (props) => {
   return (
 
-    <Container>
-      <h5 >PROGRAMA DE PÓS GRADUAÇÃO EM CIÊNCIAS DA EDUCAÇÃO</h5>
-      <h3 className='text-danger mt-3 font-weight-bold'>CERTIFICADO</h3>
-      <p className=' mt-3 text-justify'>ESTE CERTIFICADO COMPROVA QUE <b className='text-uppercase'>{props.nomeMembro}</b>
-        PARTICIPOU DO MINICURSO CURRICULO LATTES: UMA PLATAFORMA ALIADA A
-        TRAJETÓRIA ACADÊMICA , ORGANIZADO PELO O GRUPO DE PESQUISA EM
-        EDUCAÇÃO E DIVERSIDADE- GPED NO DIA 14/06/2023 COM DURAÇÃO DE 4 HORAS.</p>
-      <span className='codigo_validacao mb-5'>Código de validação: {props.codigo_validacao}</span>
-    </Container>
     // <Container>
-    //   <span className='paragrafo_principal text-uppercase'>
-    //     {props.tipo_membro === 1 ? (<p>Certificamos que <b>{props.nomeMembro}</b> participou como Apresentador no grupo de trabalho "<b>{props.grupo_trabalho}</b>" no "<b>{props.temaEvento}</b>", cujo o tema: <b>Ciência, globalização e tecnologias na Pós Graduação: Desafios e Perspectivas na contemporaneidade </b> 
-    //       realizado nos dias 11 e 12 de maio de 2023, contabilizando {props.cargaHoraria} horas de carga horária.</p>
-    //     ) : (<p>
-    //       Certificamos que <b>{props.nomeMembro}</b> participou do "<b>{props.temaEvento}</b>" , cujo o tema: <b>Ciência, globalização e tecnologias na Pós Graduação: Desafios e Perspectivas na contemporaneidade </b>, 
-    //       realizado nos dias 11 e 12 de maio de 2023, contabilizando {props.cargaHoraria} horas de carga horária.
-    //     </p>)}
-    //   </span>
-
-    //   <img src={ri_2} className="assinatura" />
-    //   <span className='nome_completo'>Alcimar José Silva</span>
-    //   <span style={{ fontSize: "16px", fontFamily: "Calibri" }}>Diretor</span>
-    //   <span className='codigo_validacao'>Código de validação: {props.codigo_validacao}</span>
+    //   <h5 >PROGRAMA DE PÓS GRADUAÇÃO EM CIÊNCIAS DA EDUCAÇÃO</h5>
+    //   <h3 className='text-danger mt-3 font-weight-bold'>CERTIFICADO</h3>
+    //   <p className=' mt-3 text-justify'>ESTE CERTIFICADO COMPROVA QUE <b className='text-uppercase'>{props.nomeMembro}</b>
+    //     PARTICIPOU DO MINICURSO CURRICULO LATTES: UMA PLATAFORMA ALIADA A
+    //     TRAJETÓRIA ACADÊMICA , ORGANIZADO PELO O GRUPO DE PESQUISA EM
+    //     EDUCAÇÃO E DIVERSIDADE- GPED NO DIA 14/06/2023 COM DURAÇÃO DE 4 HORAS.</p>
+    //   <span className='codigo_validacao mb-5'>Código de validação: {props.codigo_validacao}</span>
     // </Container>
+    <Container>
+      <span className='paragrafo_principal text-uppercase'>
+        {props.tipo_membro === 1 ? (<p>Certificamos que <b>{props.nomeMembro}</b> participou como Apresentador no grupo de trabalho "<b>{props.grupo_trabalho}</b>" no "<b>{props.temaEvento}</b>", cujo o tema: <b>Ciência, globalização e tecnologias na Pós Graduação: Desafios e Perspectivas na contemporaneidade </b> 
+          realizado nos dias 11 e 12 de maio de 2023, contabilizando {props.cargaHoraria} horas de carga horária.</p>
+        ) : (<p>
+          Certificamos que <b>{props.nomeMembro}</b> participou do "<b>{props.temaEvento}</b>" , cujo o tema: <b>Ciência, globalização e tecnologias na Pós Graduação: Desafios e Perspectivas na contemporaneidade </b>, 
+          realizado nos dias 11 e 12 de maio de 2023, contabilizando {props.cargaHoraria} horas de carga horária.
+        </p>)}
+      </span>
+
+      <img src={ri_2} className="assinatura" />
+      <span className='nome_completo'>Alcimar José Silva</span>
+      <span style={{ fontSize: "16px", fontFamily: "Calibri" }}>Diretor</span>
+      <span className='codigo_validacao'>Código de validação: {props.codigo_validacao}</span>
+    </Container>
   );
 };
 

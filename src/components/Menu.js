@@ -4,8 +4,10 @@ import api from '../services/api';
 import { slide as Slide } from 'react-burger-menu';
 import nexus_white from '../assets/logo_nexus2.png';
 import { FaCog, FaRegThumbsUp, FaUpload, FaUserCog, FaUsers, FaUsersCog, FaWrench } from 'react-icons/fa';
+import UserContext from '../UserContext';
 
 export default class Menu extends Component {
+    static contextType = UserContext;
     constructor(props) {
         super();
         this.state = {
@@ -15,21 +17,22 @@ export default class Menu extends Component {
     }
 
     componentDidMount() {
-        this.listaPermissoes(getToken());
+        const userContext = this.context;
+        this.listaPermissoes(userContext.user.id);
     }
 
     showSettings(event) {
         event.preventDefault();
     }
 
-    listaPermissoes = async (token) => {
+    listaPermissoes = async (id_usuario) => {
         try {
-            const response = await fetch(`${api.baseURL}/usuarios/${token}/permissoes`, {
+            const response = await fetch(`${api.baseURL}/usuarios/${id_usuario}/permissoes`, {
                 method: 'GET',
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
-                    'x-access-token': token
+                    'x-access-token': getToken()
                 }
             });
 

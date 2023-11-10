@@ -5,10 +5,12 @@ import styled from 'styled-components';
 import api from '../services/api';
 import { getToken, logout } from '../services/auth';
 import UserContext from '../UserContext';
+import Button from 'react-bootstrap/Button';
+import { Col, Row } from 'react-bootstrap';
 
 export default class Perfil extends Component {
   static contextType = UserContext;
-  
+
   constructor(props) {
     super();
     this.state = {
@@ -37,7 +39,7 @@ export default class Perfil extends Component {
 
   handlerShowModalEditarUsuario() {
     this.setModalShowEditarUsuario(true);
-    
+
   }
 
   handlerCloseModalEditarUsuario() {
@@ -65,7 +67,7 @@ export default class Perfil extends Component {
           id_usuario: data.resultados[0].id,
           nome: data.resultados[0].nome,
           email: data.resultados[0].email,
-          cpf_cnpj: data.resultados[0].cpf_cnpj,
+          cpf_cnpj: data.resultados[0].cpf,
           senha: data.resultados[0].senha,
           confirmarSenha: data.resultados[0].senha
         });
@@ -98,7 +100,7 @@ export default class Perfil extends Component {
       this.setState({ error: 'Por favor, informe senhas iguais.' });
     } else {
       try {
-        const response = await fetch(`${api.baseURL}/usuarios/${id_usuario}`, {
+        const response = await fetch(`${api.baseURL}/usuarios/${this.context.user.id}`, {
           method: 'PUT',
           headers: {
             Accept: 'application/json',
@@ -133,8 +135,7 @@ export default class Perfil extends Component {
   render() {
     return (
       <div>
-        <button className={this.props.className === "" ? `btn btn-sm btn-outline-light` : this.props.className} onClick={() => this.handlerShowModalEditarUsuario()}><FaRegEdit /> Perfil </button>
-
+        <button className="button" size="sm" onClick={() => this.handlerShowModalEditarUsuario()}>Perfil</button>
         <Modal
           show={this.state.modalShowEditarUsuario}
           onHide={() => this.handlerCloseModalEditarUsuario()}
@@ -142,10 +143,10 @@ export default class Perfil extends Component {
           backdrop="static"
           size='md'>
           <Modal.Header closeButton>
-            <h4 className='titulo'>Meu perfil</h4>
+            <h4 className='titulo'>Meu Perfil</h4>
           </Modal.Header>
           <Modal.Body>
-            <Form onSubmit={this.atualizarPerfil}>
+            <Form>
               <div className="form-group">
                 <label htmlFor="nome">Nome</label>
                 <input
@@ -188,34 +189,38 @@ export default class Perfil extends Component {
                 />
               </div>
 
-
-              <div className="form-group">
-                <label htmlFor="senha">Senha</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="senha"
-                  placeholder="Informe sua senha"
-                  onChange={(e) =>
-                    this.setState({ senha: e.target.value })
-                  }
-                  value={this.state.senha}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="repetir_senha">Repetir Senha</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="repetir_senha"
-                  placeholder="Informe sua senha novamente"
-                  onChange={(e) =>
-                    this.setState({ confirmarSenha: e.target.value })
-                  }
-                  value={this.state.confirmarSenha}
-                />
-              </div>
+              <Row>
+                <Col>
+                  <div className="form-group">
+                    <label htmlFor="senha">Senha</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="senha"
+                      placeholder="Informe sua senha"
+                      onChange={(e) =>
+                        this.setState({ senha: e.target.value })
+                      }
+                      value={this.state.senha}
+                    />
+                  </div>
+                </Col>
+                <Col>
+                  <div className="form-group">
+                    <label htmlFor="repetir_senha">Repetir Senha</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="repetir_senha"
+                      placeholder="Informe sua senha novamente"
+                      onChange={(e) =>
+                        this.setState({ confirmarSenha: e.target.value })
+                      }
+                      value={this.state.confirmarSenha}
+                    />
+                  </div>
+                </Col>
+              </Row>
 
               {this.state.success && (
                 <div class="alert alert-success text-center" role="alert">
@@ -227,8 +232,6 @@ export default class Perfil extends Component {
                   {this.state.error}
                 </div>
               )}
-
-              <div className="d-flex justify-content-center"> <button className="button btn-block w-50" type="submit">Atualizar</button></div>
             </Form>
           </Modal.Body>
 
@@ -239,4 +242,4 @@ export default class Perfil extends Component {
 }
 
 
-const Form = styled.form``;
+export const Form = styled.form``;

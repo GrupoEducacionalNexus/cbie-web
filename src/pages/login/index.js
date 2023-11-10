@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Form, Img } from './styles';
-import LogoAdmin from '../../assets/logo_nexus_e_enber.png';
+import Logo from '../../assets/cbie2.png';
 import api from '../../services/api';
 import { setToken, setRole, setNome } from '../../services/auth';
 import UserContext from '../../UserContext';
@@ -32,6 +32,7 @@ export default class Login extends Component {
                 const response = await fetch(`${api.baseURL}/login`, {
                     method: 'POST',
                     headers: {
+                        
                         Accept: 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -42,6 +43,7 @@ export default class Login extends Component {
                 });
 
                 const data = await response.json();
+                console.log(data);
 
                 if (data.status === 200) {
                     setToken(data.token);
@@ -59,59 +61,11 @@ export default class Login extends Component {
 
                     }
                     this.context.setUser(userData);
-                    console.log(data);
 
-                    if (data.permissao === "ADMIN") {
-                        this.props.history.push("/administrador");
-                    }
-
-                    if (data.permissao === "SECRETARIA") {
+                    if (data.papel.toLowerCase() === "secretaria") {
                         this.props.history.push("/secretaria");
                     }
-
-                    if (data.permissao === "POLO") {
-                        this.props.history.push("/provas");
-                    }
-
-                    if (data.permissao === "EVENTOS") {
-                        this.props.history.push("/eventos");
-                    }
-
-                    if (data.permissao === "ORIENTADORES") {
-                        this.props.history.push("/bancas/orientadores");
-                    }
-
-                    if (data.permissao === "ORIENTANDOS") {
-                        this.props.history.push("/bancas/orientandos");
-                    }
-
-                    if (data.permissao === "COORDENADOR") {
-                        this.props.history.push("/bancas/coordenadores");
-                    }
-
-                    if (data.permissao === "DIRETOR") {
-                        this.props.history.push("/bancas/diretor");
-                    }
-
-                    if (data.permissao === "GRUPO DE TRABALHO") {
-                        this.props.history.push("/eventos/enber/grupo_trabalho");
-                    }
-
-                    if (data.permissao === "CHAMADOS") {
-                        this.props.history.push("/chamados");
-                    }
-
-                    if (data.permissao === "CONVENIOS") {
-                        this.props.history.push("/convenios");
-                    }
-
-                    if (data.permissao === "PROFESSOR") {
-                        this.props.history.push("/correcao_redacao");
-                    }
-
-                    if (data.permissao === "ALUNOS") {
-                        this.props.history.push("/alunos");
-                    }
+                    
                 }
 
                 if (data.status === 400) {
@@ -127,8 +81,8 @@ export default class Login extends Component {
     render() {
         return (
             <Container>
-                <img src={LogoAdmin} style={{ display: "block", margin: "0 auto", width: "200px" }} className="mt-3 mb-3" />
-                <h1 className='titulo'>Gestor Grupo Nexus</h1>
+                <img src={Logo} style={{ display: "block", margin: "0 auto" }} className="mt-3 mb-3" />
+                <h1 className='titulo'>Cbie</h1>
                 <Form onSubmit={this.handlerLogin}>
                     <div class="form-group mb-3">
                         <label htmlFor="email">EMAIL:</label>
