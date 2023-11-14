@@ -521,12 +521,12 @@ Note: Beware of modifying this element as it can break the animations - you shou
 
 .accordion-button.collapsed:active,
 .accordion-button.collapsed:focus {
-  background-color: #F7C300;
+  background-color: #007a31;
   color: #ffffff;
 }
 
 .accordion-button:not(.collapsed) {
-  background-color: #F7C300; 
+  background-color: #007a31; 
   color: #ffffff;
   font-weight: bold;
 }

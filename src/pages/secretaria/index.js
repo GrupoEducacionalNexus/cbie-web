@@ -1,4 +1,4 @@
-import { FaRegSave, FaCalendarWeek, FaBoxes, FaPlus } from 'react-icons/fa';
+import { FaRegSave, FaCalendarWeek, FaBoxes, FaPlus, FaUserGraduate } from 'react-icons/fa';
 import React, { Component } from 'react';
 import api from '../../services/api';
 import { getToken } from '../../services/auth';
@@ -382,7 +382,7 @@ export default class Index extends Component {
 		const arrayHistoricoEscolar = this.state.arrayHistoricoEscolar;
 		return (
 			<>
-				<Navbar data-bs-theme="light" fixed>
+				<Navbar fixed style={{backgroundColor: "#cccccc"}}>
 					<Container>
 						<Navbar.Brand href="#home"><img id="logo" src={logo} style={{ width: "100px" }} /></Navbar.Brand>
 						<Nav className="ml-auto">
@@ -406,30 +406,31 @@ export default class Index extends Component {
 										</div>
 
 										<div className="form-group">
-											<label htmlFor="select_Usuario">RG</label>
+											<label htmlFor="rg_orgao">RG/Orgão:</label>
 											<input
 												className="form-control"
-												type="number"
-												placeholder="RG"
-												name="cpf"	
+												type="text"
+												placeholder="RG/Orgão"
+												name="rg_orgao"
+												id='rg_orgao'
 												onChange={(e) =>
-													this.setState({ rg: e.target.value })
+													this.setState({ rg_orgao: e.target.value })
 												}
-												value={this.state.rg}
+												value={this.state.rg_orgao}
 											/>
 										</div>
 
 										<div className="form-group">
-											<label htmlFor="nome">Orgão Expedidor</label>
+											<label htmlFor="dt_nascimento">Data Exp:</label>
 											<input
-												type="text"
+												type="date"
 												className="form-control"
-												id="nome"
-												placeholder="Digite seu nome"
+												id="dt_exp"
+												placeholder="Data Exp"
 												onChange={(e) =>
-													this.setState({ orgao_expedidor: e.target.value })
+													this.setState({ dt_exp: e.target.value })
 												}
-												value={this.state.orgao_expedidor}
+												value={this.state.dt_exp}
 											/>
 										</div>
 
@@ -522,7 +523,7 @@ export default class Index extends Component {
 						<Col md={12}>
 							<Accordion defaultActiveKey="0" className='mt-3 mb-5' >
 								<Accordion.Item eventKey="0" >.
-									<Accordion.Header>Gerenciar Alunos - Total: {arrayAlunos.length}</Accordion.Header>
+									<Accordion.Header><FaUserGraduate/> Gerenciar Alunos - Total: {arrayAlunos.length}</Accordion.Header>
 									<Accordion.Body>
 										<Container fluid>
 											<div className='d-flex justify-content-center text-center'>
@@ -577,18 +578,18 @@ export default class Index extends Component {
 								<Accordion.Item eventKey="1">
 									<Accordion.Header>Gerenciar livros</Accordion.Header>
 									<Accordion.Body>
-									<div class="table-wrapper">
-												<Table responsive striped hover variant="light" size='sm' className='text-center'>
-													<thead>
-														<tr>
-															<th>Titulo</th>
-															<th>Quantidade de folha</th>
-															<th>Data e Hora de Cadastro</th>
-															<th>Ação</th>
-														</tr>
-													</thead>
-												</Table>
-											</div>
+										<div class="table-wrapper">
+											<Table responsive striped hover variant="light" size='sm' className='text-center'>
+												<thead>
+													<tr>
+														<th>Titulo</th>
+														<th>Quantidade de folha</th>
+														<th>Data e Hora de Cadastro</th>
+														<th>Ação</th>
+													</tr>
+												</thead>
+											</Table>
+										</div>
 									</Accordion.Body>
 								</Accordion.Item>
 							</Accordion>
@@ -610,7 +611,7 @@ export default class Index extends Component {
 					</Modal.Header>
 					<Modal.Body>
 						<Container>
-							<h4>Atualizar Informações do Aluno</h4>
+							<h4><FaUserGraduate/> Atualizar Informações do Aluno</h4>
 							<hr />
 
 							<Form onSubmit={this.cadastrarEatualizarAluno}>
@@ -781,7 +782,6 @@ export default class Index extends Component {
 						</Container>
 
 						<h5 className='text-center'>Carga Horária/Regime</h5>
-
 						<div class="container mt-4">
 							<Table bordered>
 								<thead>
@@ -813,9 +813,7 @@ export default class Index extends Component {
 								</tbody>
 							</Table>
 						</div>
-
 					</Modal.Body>
-
 				</Modal>
 
 				<Modal
