@@ -382,7 +382,7 @@ export default class Index extends Component {
 		const arrayHistoricoEscolar = this.state.arrayHistoricoEscolar;
 		return (
 			<>
-				<Navbar fixed style={{backgroundColor: "#cccccc"}}>
+				<Navbar fixed style={{backgroundColor: "#eaeaea"}}>
 					<Container>
 						<Navbar.Brand href="#home"><img id="logo" src={logo} style={{ width: "100px" }} /></Navbar.Brand>
 						<Nav className="ml-auto">
