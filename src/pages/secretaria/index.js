@@ -13,7 +13,7 @@ import ModalRight from '../../components/ModalRight';
 import logo from '../../assets/cbie2.png';
 import * as ExcelJS from 'exceljs';
 import Stack from 'react-bootstrap/Stack';
-
+import InputMask from 'react-input-mask';
 
 export default class Index extends Component {
 	constructor(props) {
@@ -23,9 +23,18 @@ export default class Index extends Component {
 			modalShowRegistrarHistoricoAluno: false,
 			success: '',
 			error: '',
+			successAtualizarAlun: '',
+			errorAtualizarAluno: '',
+			successRegistrarHistoricoEscolar: '',
+			errorRegistrarHistoricoEscolar: '',
 
+
+			//Usuário
+			id_usuario: 0,
 			nome: '',
 			rg_orgao: '',
+			dt_exp: '',
+			dt_exp_formatada: '',
 			dt_nascimento: '',
 			dt_nascimento_formatada: '',
 			naturalidade: '',
@@ -33,7 +42,21 @@ export default class Index extends Component {
 			nacionalidade: '',
 			arrayAreasConhecimento: [],
 			arrayComponentesCurriculares: [],
-			arrayAlunos: []
+			arrayAlunos: [],
+
+			//Aluno
+			id_aluno: 0,
+
+			//Histórico
+			notaModulo1: '',
+			chModulo1: '',
+			notaModulo2: '',
+			chModulo2: '',
+			notaModulo3: '',
+			chModulo3: '',
+			idAreaConhecimento: 0,
+			idComponenteCurricular: 0,
+			arrayHistoricoEscolar: []
 		};
 	}
 
@@ -47,19 +70,27 @@ export default class Index extends Component {
 
 	handlerShowModalHistoricoAluno(aluno) {
 		this.setModalShowHistoricoAluno(true);
+		console.log(aluno);
 		this.setState({
+			id_usuario: aluno.id_usuario,
+			id_aluno: aluno.id_aluno,
 			nome: aluno.nome,
 			rg_orgao: aluno.rg_orgao,
+			dt_exp: aluno.dt_exp,
+			dt_exp_formatada: aluno.dt_exp_formatada,
 			dt_nascimento: aluno.dt_nascimento,
 			dt_nascimento_formatada: aluno.dt_nascimento_formatada,
 			naturalidade: aluno.naturalidade,
 			filiacao: aluno.filiacao,
 			nacionalidade: aluno.nacionalidade
 		});
+
+		this.buscarHistoricoEscolar(getToken(), aluno.id_aluno);
 	}
 
 	handlerCloseModalHistoricoAluno() {
 		this.setModalShowHistoricoAluno(false);
+		this.setState({ arrayHistoricoEscolar: [] });
 	};
 
 	setModalShowRegistrarHistoricoAluno(valor) {
@@ -87,7 +118,7 @@ export default class Index extends Component {
 					'x-access-token': getToken()
 				},
 				body: JSON.stringify({
-					colunas: ['nome', 'rg_orgao', 'dt_nascimento', 'naturalidade', 'filiacao', 'nacionalidade'],
+					colunas: ['nome', 'rg_orgao', 'dt_exp', 'dt_nascimento', 'naturalidade', 'filiacao', 'nacionalidade'],
 					arrayAlunos
 				})
 			});
@@ -108,38 +139,33 @@ export default class Index extends Component {
 		}
 	};
 
-	cadastrarAluno = async (e) => {
+	cadastrarEatualizarAluno = async (e) => {
 		e.preventDefault();
 		this.setState({ success: '', error: '' });
 
-		const { nome, rg, orgao_expedidor, dt_nascimento, naturalidade,
-			filiacao, nacionalidade, arrayAlunos } = this.state;
+		const { id_usuario, id_aluno, nome, rg_orgao, dt_exp, dt_nascimento, naturalidade,
+			filiacao, nacionalidade } = this.state;
 
-		if (arrayAlunos.length > 0) {
-			console.log(arrayAlunos);
-			return
-		}
-
-
-
-		if (!nome || !rg || !orgao_expedidor || !dt_nascimento || !dt_nascimento ||
+		if (!nome || !rg_orgao || !dt_nascimento || !dt_nascimento ||
 			!naturalidade || !filiacao || !nacionalidade) {
 			this.setState({ error: 'Por favor, preencher todos os campos.' });
 			return;
 		}
 
+		const url = id_aluno === 0 ? `${api.baseURL}/alunos` : `${api.baseURL}/alunos/${id_aluno}`;
+
 		try {
-			const response = await fetch(`${api.baseURL}/alunos`, {
-				method: 'POST',
+			const response = await fetch(`${url}`, {
+				method: id_aluno === 0 ? 'POST' : 'PUT',
 				headers: {
 					Accept: 'application/json',
 					'Content-Type': 'application/json',
 					'x-access-token': getToken()
 				},
 				body: JSON.stringify({
-					nome, rg, orgao_expedidor, dt_nascimento,
+					id_usuario, nome, rg_orgao, dt_exp, dt_nascimento,
 					naturalidade, filiacao, nacionalidade
-				}),
+				})
 			});
 
 			const data = await response.json();
@@ -147,6 +173,7 @@ export default class Index extends Component {
 
 			if (data.status === 200) {
 				this.setState({ success: data.msg });
+				this.listaDeAlunos(getToken());
 			}
 
 			if (data.status === 400) {
@@ -170,7 +197,7 @@ export default class Index extends Component {
 			console.log(worksheet);
 
 			const rows = [];
-			const header = ['nome', 'rg_orgao', 'dt_nascimento', 'naturalidade', 'filiacao', 'nacionalidade', 'curso'];
+			const header = ['nome', 'rg_orgao', 'dt_exp', 'dt_nascimento', 'naturalidade', 'filiacao', 'nacionalidade', 'curso'];
 
 			worksheet.eachRow((row, rowNumber) => {
 				if (rowNumber > 1) {
@@ -211,6 +238,8 @@ export default class Index extends Component {
 	};
 
 	listaDeComponentesCurriculares = async (token, idAreaConhecimento) => {
+
+		this.setState({ idAreaConhecimento });
 		try {
 			const response = await fetch(`${api.baseURL}/areas_conhecimento/${idAreaConhecimento}/componente_curricular`,
 				{
@@ -224,7 +253,7 @@ export default class Index extends Component {
 			);
 			const data = await response.json();
 			if (data.status === 200) {
-				this.setState({ arrayAreasConhecimento: data.resultados });
+				this.setState({ arrayComponentesCurriculares: data.resultados });
 			}
 		} catch (error) {
 			console.log(error);
@@ -252,8 +281,105 @@ export default class Index extends Component {
 		}
 	};
 
+	cadastrarHistoricoEscolar = async (e) => {
+		e.preventDefault();
+		this.setState({ successRegistrarHistoricoEscolar: '', errorRegistrarHistoricoEscolar: '' });
+
+		const {
+			id_aluno, idAreaConhecimento, idComponenteCurricular,
+			notaModulo1, chModulo1,
+			notaModulo2, chModulo2,
+			notaModulo3, chModulo3 } = this.state;
+
+		if (!idAreaConhecimento || !idComponenteCurricular
+			|| !notaModulo1 || !chModulo1 ||
+			!notaModulo2 || !chModulo2 ||
+			!notaModulo3 || !chModulo3) {
+			this.setState({ error: 'Por favor, preencher todos os campos.' });
+			return;
+		}
+
+		try {
+			const response = await fetch(`${api.baseURL}/historico_escolar`, {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+					'x-access-token': getToken()
+				},
+				body: JSON.stringify({
+					idAluno: id_aluno, idAreaConhecimento, idComponenteCurricular,
+					notaModulo1, chModulo1,
+					notaModulo2, chModulo2,
+					notaModulo3, chModulo3
+				}),
+			});
+
+			const data = await response.json();
+			//console.log(data)
+
+			if (data.status === 200) {
+				this.setState({ successRegistrarHistoricoEscolar: data.msg });
+			}
+
+			if (data.status === 400) {
+				this.setState({ errorRegistrarHistoricoEscolar: data.msg });
+			}
+		} catch (error) {
+			console.log(error)
+			this.setState({ errorRegistrarHistoricoEscolar: 'Ocorreu um erro' });
+		}
+	};
+
+	buscarHistoricoEscolar = async (token, idAluno) => {
+		try {
+			const response = await fetch(`${api.baseURL}/alunos/${idAluno}/historico_escolar`,
+				{
+					method: 'GET',
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+						'x-access-token': token
+					}
+				}
+			);
+			const data = await response.json();
+			console.log(data);
+			if (data.status === 200) {
+				this.setState({ arrayHistoricoEscolar: data.resultados });
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	componentesCurricularesEsuasDiciplinas = (ac, cc, nM1, nM2, nM3, chM1, chM2, chM3) => {
+		return (
+			<React.Fragment>
+				<tr>
+					<td rowSpan="3">{ac}</td>
+				</tr>
+				{
+					cc.map((item, index) => (
+						<tr>
+							<td>{item}</td>
+							<td>{nM1[index]}</td>
+							<td>{chM1[index]}</td>
+							<td>{nM2[index]}</td>
+							<td>{chM2[index]}</td>
+							<td>{nM3[index]}</td>
+							<td>{chM3[index]}</td>
+						</tr>
+					))
+				}
+				<span></span>
+			</React.Fragment>
+		)
+	}
+
 	render() {
 		const arrayAlunos = this.state.arrayAlunos;
+		const arrayHistoricoEscolar = this.state.arrayHistoricoEscolar;
 		return (
 			<>
 				<Navbar data-bs-theme="light" fixed>
@@ -264,7 +390,7 @@ export default class Index extends Component {
 							<Nav.Link href="#features"><Perfil /></Nav.Link>
 							<Nav.Link href="#pricing">
 								<ModalRight key={0} placement={`end`} name={`Cadastrar Aluno`}>
-									<Form onSubmit={this.cadastrarAluno}>
+									<Form onSubmit={this.cadastrarEatualizarAluno}>
 										<div className="form-group">
 											<label htmlFor="nome">Nome</label>
 											<input
@@ -395,8 +521,8 @@ export default class Index extends Component {
 					<Row>
 						<Col md={12}>
 							<Accordion defaultActiveKey="0" className='mt-3 mb-5' >
-								<Accordion.Item eventKey="0" >
-									<Accordion.Header>Relação dos Alunos</Accordion.Header>
+								<Accordion.Item eventKey="0" >.
+									<Accordion.Header>Gerenciar Alunos - Total: {arrayAlunos.length}</Accordion.Header>
 									<Accordion.Body>
 										<Container fluid>
 											<div className='d-flex justify-content-center text-center'>
@@ -413,7 +539,8 @@ export default class Index extends Component {
 													<thead>
 														<tr>
 															<th>Nome Completo</th>
-															<th>Rg - Orgão Expedidor</th>
+															<th>Rg - Orgão</th>
+															<th>Data - Exp</th>
 															<th>Data de nascimento</th>
 															<th>Naturalidade</th>
 															<th>Nacionalidade</th>
@@ -427,6 +554,7 @@ export default class Index extends Component {
 																<tr>
 																	<td>{aluno.nome}</td>
 																	<td>{aluno.rg_orgao}</td>
+																	<td>{aluno.dt_exp_formatada}</td>
 																	<td>{aluno.dt_nascimento_formatada}</td>
 																	<td>{aluno.nacionalidade}</td>
 																	<td>{aluno.naturalidade}</td>
@@ -468,19 +596,19 @@ export default class Index extends Component {
 					onHide={() => this.handlerCloseModalHistoricoAluno()}
 					aria-labelledby="contained-modal-title-vcenter"
 					backdrop="static"
-					size="xl"
+					fullscreen="xxl-down"
 					centered>
-					<Form onSubmit={this.state.modalShowHistoricoAluno}>
-						<Modal.Header closeButton>
-							<Modal.Title id="contained-modal-title-vcenter" >
-								<h5 className='titulo'>Histórico do Aluno</h5>
-							</Modal.Title>
-						</Modal.Header>
-						<Modal.Body>
+					<Modal.Header closeButton>
+						<Modal.Title id="contained-modal-title-vcenter" >
+							<h5 className='titulo'>Histórico do Aluno</h5>
+						</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						<Container>
+							<h4>Atualizar Informações do Aluno</h4>
+							<hr />
 
-							<Container>
-								<h4>Atualizar Informações do Aluno</h4>
-								<hr />
+							<Form onSubmit={this.cadastrarEatualizarAluno}>
 								<Row>
 									<Col xs={6}>
 										<div className="form-group">
@@ -513,7 +641,21 @@ export default class Index extends Component {
 											/>
 										</div>
 									</Col>
-									
+									<Col>
+										<div className="form-group">
+											<label htmlFor="dt_nascimento">Data Exp:</label>
+											<input
+												type="date"
+												className="form-control"
+												id="dt_exp"
+												placeholder="Data Exp"
+												onChange={(e) =>
+													this.setState({ dt_exp: e.target.value })
+												}
+												value={this.state.dt_exp}
+											/>
+										</div>
+									</Col>
 								</Row>
 								<Row>
 									<Col>
@@ -548,21 +690,6 @@ export default class Index extends Component {
 									</Col>
 									<Col>
 										<div className="form-group">
-											<label htmlFor="nome">Filiação</label>
-											<input
-												type="text"
-												className="form-control"
-												id="nome"
-												placeholder="Filiação"
-												onChange={(e) =>
-													this.setState({ filiacao: e.target.value })
-												}
-												value={this.state.filiacao}
-											/>
-										</div>
-									</Col>
-									<Col>
-										<div className="form-group">
 											<label htmlFor="nome">Nacionalidade</label>
 											<input
 												type="text"
@@ -577,26 +704,47 @@ export default class Index extends Component {
 										</div>
 									</Col>
 								</Row>
-							</Container>
+								<Row>
+									<Col xs={6}>
+										<div className="form-group">
+											<label htmlFor="nome">Filiação</label>
+											<input
+												type="text"
+												className="form-control"
+												id="nome"
+												placeholder="Filiação"
+												onChange={(e) =>
+													this.setState({ filiacao: e.target.value })
+												}
+												value={this.state.filiacao}
+											/>
+										</div>
+									</Col>
+								</Row>
 
-							{this.state.success && (
-								<div class="alert alert-success text-center" role="alert">
-									{this.state.success}
+								{this.state.success && (
+									<div class="alert alert-success text-center" role="alert">
+										{this.state.success}
+									</div>
+								)}
+								{this.state.error && (
+									<div className="alert alert-danger text-center" role="alert">
+										{this.state.error}
+									</div>
+								)}
+
+								<div className='d-flex justify-content-center'>
+									<button className="button" type="submit">
+										Atualizar
+									</button>
 								</div>
-							)}
-							{this.state.error && (
-								<div className="alert alert-danger text-center" role="alert">
-									{this.state.error}
-								</div>
-							)}
+							</Form>
+						</Container>
 
-							<div className='d-flex justify-content-center'>
-								<button className="button" type="submit">
-									Atualizar
-								</button>
-							</div>
 
-							<hr />
+
+						<hr />
+						<Container>
 							<Stack direction="horizontal" gap={3}>
 								<div className="p-2"><h4>Histórico</h4></div>
 								<div className="p-2 ms-auto"><button className="button" size='sm' onClick={() => this.handlerShowModalRegistrarHistoricoAluno()}>
@@ -611,127 +759,58 @@ export default class Index extends Component {
 									</tr>
 									<tr>
 										<td colSpan={3}>Rg/Órg.Expedidor: {this.state.rg_orgao}</td>
-										<td colSpan={3}>Data de Expedição: </td>
+										<td colSpan={3}>Data de Expedição: {this.state.dt_exp_formatada}</td>
 									</tr>
 									<tr>
 										<td colSpan={3}>Data de Nascimento: {this.state.dt_nascimento_formatada}</td>
 										<td colSpan={6}>Nacionalidade: {this.state.nacionalidade}</td>
 									</tr>
 									<tr>
-										<td colSpan={12}>Naturalidade: {this.state.nacionalidade}</td>
+										<td colSpan={12}>Naturalidade: {this.state.naturalidade}</td>
 									</tr>
 									<tr>
 										<td colSpan={12}>Filiação: {this.state.filiacao}</td>
 									</tr>
 								</tbody>
 							</Table>
+						</Container>
 
-							<h5 className='text-center'>Carga Horária/Regime</h5>
+						<h5 className='text-center'>Carga Horária/Regime</h5>
 
-							<div class="container mt-4">
-								<Table bordered>
-									<thead>
-										<tr>
-											<th>Áreas de Conhecimento</th>
-											<th>Componentes Curriculares</th>
-											<th>Módulo I Menção/Nota</th>
-											<th>CH</th>
-											<th>Módulo II Menção/Nota</th>
-											<th>CH</th>
-											<th>Módulo III Menção/Nota</th>
-											<th>CH</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td rowspan="4">Ciências Humanas e suas Tecnologias</td>
-										</tr>
-										<tr>
-											<td>História</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-										</tr>
-										<tr>
-											<td>Geografia</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-										</tr>
-										<tr>
-											<td>Filosofia</td>
-											<td>-</td>
-											<td>20</td>
-											<td>-</td>
-											<td>20</td>
-											<td>-</td>
-											<td>20</td>
-										</tr>
-										<tr>
-											<td rowspan="4">Ciências da Natureza,
-												Matemática e
-												suas Tecnologias</td>
-										</tr>
-										<tr>
-											<td>Matemática</td>
-											<td>-</td>
-											<td>80</td>
-											<td>-</td>
-											<td>80</td>
-											<td>-</td>
-											<td>80</td>
-										</tr>
-										<tr>
-											<td>Física</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-										</tr>
-										<tr>
-											<td>Química</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-											<td>-</td>
-											<td>30</td>
-										</tr>
-									</tbody>
-								</Table>
-							</div>
+						<div class="container mt-4">
+							<Table bordered>
+								<thead>
+									<tr>
+										<th>Áreas de Conhecimento</th>
+										<th>Componentes Curriculares</th>
+										<th>Módulo I Menção/Nota</th>
+										<th>CH</th>
+										<th>Módulo II Menção/Nota</th>
+										<th>CH</th>
+										<th>Módulo III Menção/Nota</th>
+										<th>CH</th>
+									</tr>
+								</thead>
+								<tbody>
+									{arrayHistoricoEscolar.length > 0 ? (
+										arrayHistoricoEscolar.map(item => {
+											const cc = item.cc.split(',');
+											const nM1 = item.nM1.split(',');
+											const nM2 = item.nM2.split(',');
+											const nM3 = item.nM3.split(',');
+											const chM1 = item.chM1.split(',');
+											const chM2 = item.chM2.split(',');
+											const chM3 = item.chM3.split(',');
+											return this.componentesCurricularesEsuasDiciplinas(item.ac, cc, nM1, nM2, nM3, chM1, chM2, chM3);
+										})
+									) : ("")}
 
-							<div className="row mt-2">
-								<div className="col-sm-12">
-									{this.state.success && (
-										<div
-											className="alert alert-success text-center"
-											role="alert"
-										>
-											{this.state.success}
-										</div>
-									)}
-									{this.state.error && (
-										<div
-											className="alert alert-danger text-center"
-											role="alert"
-										>
-											{this.state.error}
-										</div>
-									)}
-								</div>
-							</div>
+								</tbody>
+							</Table>
+						</div>
 
-						</Modal.Body>
-					</Form>
+					</Modal.Body>
+
 				</Modal>
 
 				<Modal
@@ -743,52 +822,135 @@ export default class Index extends Component {
 					centered>
 
 					<Modal.Header closeButton>
-						<Modal.Title id="contained-modal-title-vcenter" >
+						<Modal.Title id="contained-modal-title-vcenter">
 							<h5 className='titulo'>Registrar Histórico</h5>
 						</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
-						<Form.Label htmlFor="inputPassword5">Área de Conhecimento</Form.Label>
-						<Form.Select size='sm mb-2' aria-label="Default select example"
-							onChange={(e) => this.listaDeComponentesCurriculares(getToken(), e.target.value)}>
-							<option>Selecione</option>
-							{this.state.arrayAreasConhecimento.length > 0 ? (
-								this.state.arrayAreasConhecimento.map(item => (
-									<option value={item.id}>{item.nome}</option>
-								))
-							) : ("")}
-						</Form.Select>
-						<Form.Label htmlFor="inputPassword5">Componente Curricular</Form.Label>
-						<Form.Select size='sm mb-2' aria-label="Default select example">
-							<option>Selecione</option>
-							{this.state.arrayAreasConhecimento.length > 0 ? (
-								this.state.arrayAreasConhecimento.map(item => (
-									<option value={item.id}>{item.nome}</option>
-								))
-							) : ("")}
-						</Form.Select>
+						<Form onSubmit={this.cadastrarHistoricoEscolar}>
+							<Form.Label htmlFor="inputPassword5">Área de Conhecimento</Form.Label>
+							<Form.Select size='sm mb-2' aria-label="Default select example"
+								onChange={(e) => this.listaDeComponentesCurriculares(getToken(), e.target.value)}>
+								<option>Selecione</option>
+								{this.state.arrayAreasConhecimento.length > 0 ? (
+									this.state.arrayAreasConhecimento.map(item => (
+										<option value={item.id}>{item.nome}</option>
+									))
+								) : ("")}
+							</Form.Select>
 
-						<div className="row mt-2">
-							<div className="col-sm-12">
-								{this.state.success && (
-									<div
-										className="alert alert-success text-center"
-										role="alert"
-									>
-										{this.state.success}
+							<Form.Label htmlFor="inputPassword5">Componente Curricular</Form.Label>
+							<Form.Select size='sm mb-2' aria-label="Default select example"
+								onChange={e => this.setState({ idComponenteCurricular: e.target.value })}>
+								<option>Selecione</option>
+								{this.state.arrayComponentesCurriculares.length > 0 ? (
+									this.state.arrayComponentesCurriculares.map(item => (
+										<option value={item.id}>{item.nome}</option>
+									))
+								) : ("")}
+							</Form.Select>
+
+							<Row>
+								<Col>
+									<div className="form-group">
+										<label htmlFor="nome">Nota - Módulo 1</label>
+										<InputMask
+											className="form-control"
+											mask="9,9"
+											value={this.state.notaModulo1}
+											onChange={e => this.setState({ notaModulo1: e.target.value })}
+										/>
 									</div>
-								)}
-								{this.state.error && (
-									<div
-										className="alert alert-danger text-center"
-										role="alert"
-									>
-										{this.state.error}
+								</Col>
+								<Col>
+									<div className="form-group">
+										<label htmlFor="nome">Carga Horária - Módulo 1</label>
+										<InputMask
+											className="form-control"
+											mask="99"
+											value={this.state.chModulo1}
+											onChange={e => this.setState({ chModulo1: e.target.value })}
+										/>
 									</div>
-								)}
+								</Col>
+							</Row>
+
+							<Row>
+								<Col>
+									<div className="form-group">
+										<label htmlFor="nome">Nota - Módulo 2</label>
+										<InputMask
+											className="form-control"
+											mask="9,9"
+											value={this.state.notaModulo2}
+											onChange={e => this.setState({ notaModulo2: e.target.value })}
+										/>
+									</div>
+								</Col>
+								<Col>
+									<div className="form-group">
+										<label htmlFor="nome">Carga Horária - Módulo 2</label>
+										<InputMask
+											className="form-control"
+											mask="99"
+											value={this.state.chModulo2}
+											onChange={e => this.setState({ chModulo2: e.target.value })}
+										/>
+									</div>
+								</Col>
+							</Row>
+
+							<Row>
+								<Col>
+									<div className="form-group">
+										<label htmlFor="nome">Nota - Módulo 3</label>
+										<InputMask
+											className="form-control"
+											mask="9,9"
+											value={this.state.notaModulo3}
+											onChange={e => this.setState({ notaModulo3: e.target.value })}
+										/>
+									</div>
+								</Col>
+								<Col>
+									<div className="form-group">
+										<label htmlFor="nome">Carga Horária - Módulo 3</label>
+										<InputMask
+											className="form-control"
+											mask="99"
+											value={this.state.chModulo3}
+											onChange={e => this.setState({ chModulo3: e.target.value })}
+										/>
+									</div>
+								</Col>
+							</Row>
+
+							<div className="row mt-2">
+								<div className="col-sm-12">
+									{this.state.successRegistrarHistoricoEscolar && (
+										<div
+											className="alert alert-success text-center"
+											role="alert"
+										>
+											{this.state.successRegistrarHistoricoEscolar}
+										</div>
+									)}
+									{this.state.errorRegistrarHistoricoEscolar && (
+										<div
+											className="alert alert-danger text-center"
+											role="alert"
+										>
+											{this.state.errorRegistrarHistoricoEscolar}
+										</div>
+									)}
+								</div>
 							</div>
-						</div>
-
+							<div className='d-flex justify-content-center'>
+								<Button className='button' type="submit">
+									Registrar
+								</Button>
+							</div>
+						</Form>
 					</Modal.Body>
 				</Modal>
 			</>
