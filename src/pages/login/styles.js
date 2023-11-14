@@ -6,11 +6,12 @@ export const Container = styled.div`
   justify-content: center;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #424047;
 
   .titulo {
     font-size: 20px;
     text-align:center;
-    color: #FFFFFF;
+    color: #424047;
     font-weight: bold;
     margin-bottom: 20px;
   }
@@ -24,7 +25,7 @@ export const Container = styled.div`
 
 export const Form = styled.form`
   width: 420px;
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   padding: 40px;
   border: 1px solid rgba(0,0,0,0.2);
   border-radius: 10px;

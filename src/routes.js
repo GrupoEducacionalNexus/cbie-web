@@ -32,7 +32,7 @@ const Routes = () => {
                 <Route exact path="/" component={Login} />
                 <Route path="/validacao" component={Validacao} />
                 <PrivateRoute path="/administrador" component={Administrador} />
-                <PrivateRoute path="/secretaria" component={Secretaria} />
+                <Route path="/secretaria" component={Secretaria} />
                 <Route path="*" component={PageNotFound} />
             </Switch>
         </BrowserRouter>
